@@ -18,12 +18,14 @@ public class PatientFhirHelper {
 
     public PatientFhirHelper() {
         ctx = FhirContext.forR4();
+        ctx.getRestfulClientFactory().setSocketTimeout(200000000);
         client = ctx.newRestfulGenericClient(DSTU2_URL);
     }
 
     public List<Patient> getPatients() {
         // Invoke the client
-        Bundle bundle = client.search().forResource(Patient.class)
+        Bundle bundle = client.search()
+                .forResource(Patient.class)
                 .prettyPrint()
                 .returnBundle(Bundle.class)
                 .execute();

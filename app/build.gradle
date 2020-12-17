@@ -41,16 +41,17 @@ android {
 
 dependencies {
 
+    // https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-android
+    compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-android', version: '5.2.0'
+    // https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-structures-r4
+    compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-structures-r4', version: '5.2.0'
+
+
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    // https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-android
-    compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-android', version: '5.2.0'
-    // https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-structures-r4
-    compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-structures-r4', version: '5.2.0'
-
 
 }
