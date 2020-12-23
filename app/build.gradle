@@ -23,12 +23,14 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField 'String', 'API_URL', '"http://195.211.240.48:10093/hapi-fhir-jpaserver/fhir"'
+            //buildConfigField 'String', 'API_URL', '"http://195.211.240.48:10093/hapi-fhir-jpaserver/fhir"'
+            buildConfigField 'String', 'API_URL', '"http://192.168.2.20:9093/hapi-fhir-jpaserver/fhir"'
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
-            buildConfigField 'String', 'API_URL', '"http://195.211.240.48:10093/hapi-fhir-jpaserver/fhir"'
+            //buildConfigField 'String', 'API_URL', '"http://195.211.240.48:10093/hapi-fhir-jpaserver/fhir"'
+            buildConfigField 'String', 'API_URL', '"http://192.168.2.20:9093/hapi-fhir-jpaserver/fhir"'
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -46,6 +48,7 @@ dependencies {
     // https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-structures-r4
     compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-structures-r4', version: '5.2.0'
 
+    implementation 'com.framgia.library.calendardayview:library:1.0.4'
 
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
