@@ -1,42 +1,48 @@
-package org.ddmed.planer;
+package org.ddmed.planer.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.text.InputType;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.ddmed.planer.Event;
+import org.ddmed.planer.Popup;
+import org.ddmed.planer.R;
+import org.ddmed.planer.services.LocationService;
+import org.ddmed.planer.services.ReferenceService;
+import org.ddmed.planer.services.ServiceRequestService;
 import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.ServiceRequest;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import android.os.Bundle;
+
 import androidx.core.content.ContextCompat;
+
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
+
 import com.framgia.library.calendardayview.CalendarDayView;
 import com.framgia.library.calendardayview.EventView;
 import com.framgia.library.calendardayview.PopupView;
 import com.framgia.library.calendardayview.data.IEvent;
 import com.framgia.library.calendardayview.data.IPopup;
 import com.framgia.library.calendardayview.decoration.CdvDecorationDefault;
-import java.util.ArrayList;
-import java.util.Calendar;
 
-import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
     private TextView textView;
@@ -45,6 +51,10 @@ public class MainActivity extends AppCompatActivity {
     private Button btnSelect;
     private EditText eText;
     private DatePickerDialog picker;
+    private Button btnOpenPopup;
+
+    private ArrayList<Location> locations;
+
     String[] DayOfWeek = {"Sunday", "Monday", "Tuesday",
             "Wednesday", "Thursday", "Friday", "Saturday"};
 
@@ -56,81 +66,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         setContentView(R.layout.activity_main);
-        //textView = (TextView) findViewById(R.id.textView);
-        spinner = (Spinner) findViewById(R.id.spinner1);
-        eText = (EditText) findViewById(R.id.editText1);
+        spinner = (Spinner) findViewById(R.id.spn_new_SR_patient);
+        eText = (EditText) findViewById(R.id.edt_day);
         eText.setInputType(InputType.TYPE_NULL);
         final Calendar cldr = Calendar.getInstance();
         int day = cldr.get(Calendar.DAY_OF_MONTH);
         int month = cldr.get(Calendar.MONTH);
         int year = cldr.get(Calendar.YEAR);
+        locations = new ArrayList<>();
         eText.setText(day + "/" + (month + 1) + "/" + year);
 
-        String[] items = new String[]{"1", "2", "three"};
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
-        spinner.setAdapter(adapter);
-
+        initLocations();
+        initServiceRequest();
         addOnClickListener();
+        /*calenderTest();*/
 
-        final Button btnOpenPopup = (Button) findViewById(R.id.button2);
-        btnOpenPopup.setOnClickListener(new Button.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-                LayoutInflater layoutInflater =
-                        (LayoutInflater)getBaseContext()
-                                .getSystemService(LAYOUT_INFLATER_SERVICE);
-                View popupView = layoutInflater.inflate(R.layout.popup, null);
-                final PopupWindow popupWindow = new PopupWindow(
-                        popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
-                Button btnDismiss = (Button)popupView.findViewById(R.id.dismiss);
-
-                Spinner popupSpinner = (Spinner)popupView.findViewById(R.id.popupspinner);
-
-                ArrayAdapter<String> adapter =
-                        new ArrayAdapter<String>(MainActivity.this,
-                                android.R.layout.simple_spinner_item, DayOfWeek);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                popupSpinner.setAdapter(adapter);
-
-                btnDismiss.setOnClickListener(new Button.OnClickListener(){
-
-                    @Override
-                    public void onClick(View v) {
-                        popupWindow.dismiss();
-                    }});
-
-                popupWindow.showAsDropDown(btnOpenPopup, 50, -30);
-
-                popupView.setOnTouchListener(new View.OnTouchListener() {
-                    int orgX, orgY;
-                    int offsetX, offsetY;
-
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        switch (event.getAction()) {
-                            case MotionEvent.ACTION_DOWN:
-                                orgX = (int) event.getX();
-                                orgY = (int) event.getY();
-                                break;
-                            case MotionEvent.ACTION_MOVE:
-                                offsetX = (int)event.getRawX() - orgX;
-                                offsetY = (int)event.getRawY() - orgY;
-                                popupWindow.update(offsetX, offsetY, -1, -1, true);
-                                break;
-                        }
-                        return true;
-                    }});
-            }
-
-        });
-        calenderTest();
     }
 
-    public void calenderTest() {
+   /* public void calenderTest() {
         dayView = (CalendarDayView) findViewById(R.id.dayView);
         dayView.setLimitTime(9, 22);
 
@@ -236,39 +192,27 @@ public class MainActivity extends AppCompatActivity {
 
         dayView.setEvents(events);
         dayView.setPopups(popups);
-    }
+    }*/
 
     private void addOnClickListener() {
+        spinner = (Spinner) findViewById(R.id.spn_new_SR_patient);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                initServiceRequest();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         btnOk = (Button) findViewById(R.id.button);
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final String[] s = {"", ""};
-                Handler handler = new Handler();
-                Thread thread = new Thread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        PatientFhirHelper patientFhirHelper = new PatientFhirHelper();
-
-                        for (Patient patient : patientFhirHelper.getPatients())
-                            s[0] += patient.getNameFirstRep().getFamily() + " ";
-
-                        LocationFhirHelper locationFhirHelper = new LocationFhirHelper();
-                        for (Location location : locationFhirHelper.getLocation())
-                            s[1] += location.getName() + " ";
-
-                        handler.post(new Runnable() {
-                            public void run() {
-                                //textView.setText(s[0]);
-                                ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, s[1].split(" "));
-                                spinner.setAdapter(adapter);
-                            }
-                        });
-                    }
-                });
-
-                thread.start();
+                initLocations();
             }
         });
 
@@ -280,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        eText = (EditText) findViewById(R.id.editText1);
+        eText = (EditText) findViewById(R.id.edt_day);
         eText.setInputType(InputType.TYPE_NULL);
         eText.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -294,10 +238,88 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                                 eText.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
+                                initServiceRequest();
                             }
                         }, year, month, day);
                 picker.show();
             }
         });
+        btnOpenPopup = (Button) findViewById(R.id.button2);
+        btnOpenPopup.setOnClickListener(new Button.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), NewServiceRequestActivity.class);
+                Location location = locations.get(spinner.getSelectedItemPosition());
+                intent.putExtra("location", location);
+                int day = Integer.parseInt(eText.getText().toString().split("/")[0]);
+                int month = Integer.parseInt(eText.getText().toString().split("/")[1]) - 1;
+                int year = Integer.parseInt(eText.getText().toString().split("/")[2]);
+                Date date = new Date(year, month, day);
+
+                intent.putExtra("date", date);
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void initLocations() {
+        final String[] s = {""};
+        Handler handler = new Handler();
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                locations = (ArrayList<Location>) LocationService.getLocations();
+                for (Location location : locations)
+                    s[0] += location.getName() + ";";
+
+                handler.post(new Runnable() {
+                    public void run() {
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, s[0].split(";"));
+                        spinner.setAdapter(adapter);
+                    }
+                });
+            }
+        });
+
+        thread.start();
+    }
+
+    private void initServiceRequest() {
+        final String[] s = {""};
+        Handler handler = new Handler();
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                ArrayList<ServiceRequest> serviceRequests = (ArrayList<ServiceRequest>) ServiceRequestService.getServiceRequest();
+                int day = Integer.parseInt(eText.getText().toString().split("/")[0]);
+                int month = Integer.parseInt(eText.getText().toString().split("/")[1]) - 1;
+                int year = Integer.parseInt(eText.getText().toString().split("/")[2]);
+                System.out.println(year);
+                for (ServiceRequest serviceRequest : serviceRequests) {
+                    if (serviceRequest.getOccurrencePeriod().getStart().getYear() == year - 1900
+                            && serviceRequest.getOccurrencePeriod().getStart().getMonth() == month
+                            && serviceRequest.getOccurrencePeriod().getStart().getDate() == day)
+                        if (!locations.isEmpty() && spinner.getSelectedItemPosition() >= 0) {
+                            System.out.println("shit");
+                            if (serviceRequest.getLocationReferenceFirstRep().getId().equals(ReferenceService.getReference(locations.get(spinner.getSelectedItemPosition())).getId()))
+                                s[0] += NewServiceRequestActivity.periodCheck(serviceRequest.getOccurrencePeriod());
+                        } else
+                            s[0] += NewServiceRequestActivity.periodCheck(serviceRequest.getOccurrencePeriod());
+
+                }
+                System.out.println("some - " + serviceRequests.size() + " - " + s[0]);
+                handler.post(new Runnable() {
+                    public void run() {
+                        TextView textView = (TextView) findViewById(R.id.textView);
+                        textView.setText(s[0]);
+                    }
+                });
+            }
+        });
+
+        thread.start();
     }
 }

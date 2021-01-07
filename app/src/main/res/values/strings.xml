@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Planer</string>
+    <string name="code">Вид травми</string>
+    <string name="time_start">Час початку</string>
+    <string name="duration">Тривалість огляду</string>
+    <string name="patient">Паціент</string>
+    <string name="practitioner">Лікарь</string>
+    <string name="cancel">Скасувати</string>
+    <string name="save">Зберегти</string>
 </resources>

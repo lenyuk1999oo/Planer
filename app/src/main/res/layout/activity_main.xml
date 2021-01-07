@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".Activities.MainActivity">
 
     <Button
         android:id="@+id/button"
@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Spinner
-        android:id="@+id/spinner1"
+        android:id="@+id/spn_new_SR_patient"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="550dp"
@@ -28,13 +28,13 @@
         android:layout_marginBottom="20dp"
         android:background="@android:drawable/btn_dropdown"
         android:spinnerMode="dropdown"
-        app:layout_constraintBottom_toTopOf="@+id/editText1"
+        app:layout_constraintBottom_toTopOf="@+id/edt_day"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/editText1"
+        android:id="@+id/edt_day"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="500dp"
@@ -46,7 +46,7 @@
         app:layout_constraintBottom_toTopOf="@+id/scrollView2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinner1" />
+        app:layout_constraintTop_toBottomOf="@+id/spn_new_SR_patient" />
 
     <Button
         android:id="@+id/select"
@@ -73,13 +73,19 @@
         app:layout_constraintBottom_toTopOf="@+id/select"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editText1">
-                <com.framgia.library.calendardayview.CalendarDayView
+        app:layout_constraintTop_toBottomOf="@+id/edt_day">
+
+                <!--<com.framgia.library.calendardayview.CalendarDayView
                     android:id="@+id/dayView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:dayHeight="@dimen/dayHeight"/>
+                    app:dayHeight="@dimen/dayHeight"/>-->
 
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView" />
     </ScrollView>
 
     <Button
